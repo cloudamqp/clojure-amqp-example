@@ -1,28 +1,36 @@
 (ns clojure-amqp-example.core
-  (:require [langohr.core      :as lhc]
-            [langohr.basic     :as lhb]
-            [langohr.queue     :as lhq]
-            ))
+  (:require [langohr.core      :as rmq]
+            [langohr.channel   :as lch]
+            [langohr.queue     :as lq]
+            [langohr.consumers :as lc]
+            [langohr.basic     :as lb]))
 
-(defn split-amqp-url [url]
-  "Parses AMQP urls, eg. amqp@user:pass@lemur.cloudamqp.com/vhost"
-  (if (not (nil? url))
-    (let [matcher (re-matcher #"^.*://(.*?):(.*?)@(.*?)/(.*)$" url)]
-      (when (.find matcher) ;; Check if it matches.
-        (dissoc 
-          (zipmap [:match :username :password :host :vhost] (re-groups matcher))
-          :match)))
-    {}))
+(def amqp-conn 
+  (let [uri (get (System/getenv) "CLOUDAMQP_URL")]
+    (rmq/connect {:uri uri}))) ;; Connect to the broker
+
+(defn publish-periodically []
+  (.start (Thread. 
+            #(let [channel (lch/open amqp-conn)
+                   exchange ""
+                   queue    "cloudamqp.example"]
+               (lq/declare channel queue :auto-delete true :exclusive false)
+               (println "Publishing to" queue)
+               (loop [i 1]
+                 (lb/publish channel exchange queue (str "Message " i))
+                 (Thread/sleep 1000)
+                 (recur (inc i)))))))
+
+(defn print-messages []
+  (let [channel (lch/open amqp-conn)
+        exchange ""
+        queue    "cloudamqp.example"]
+    (lq/declare channel queue :auto-delete true :exclusive false)
+    (lc/subscribe channel queue (fn [ch metadata payload]
+                                  (println (String. payload)))
+                  :auto-ack true)
+    (println "Subscribing to" queue)))
 
 (defn -main [& args]
-  (let [url (get (System/getenv) "CLOUDAMQP_URL") ;; Get the URL
-        config (split-amqp-url url) ;; Split to URL to a map
-        conn (lhc/connect config) ;; open the connection to CloudAMQP
-        channel (.createChannel conn) ;; open a channel
-        exchange "" ;; use the default excahnge
-        queue (.getQueue (lhq/declare channel exchange :auto-delete true))
-        payload "Hello CloudAMQP!"]
-    (lhb/publish channel exchange queue payload) ;; Publish the payload
-    (println (String. (.getBody (lhb/get channel queue)))) ;; Get and print
-    (.close conn) ;; close the connection
-    ))
+  (publish-periodically)
+  (print-messages))
