@@ -6,8 +6,9 @@
             [langohr.basic     :as lb]))
 
 (def amqp-conn 
-  (let [uri (get (System/getenv) "CLOUDAMQP_URL")]
-    (rmq/connect {:uri uri}))) ;; Connect to the broker
+  (let [uri (get (System/getenv) "CLOUDAMQP_URL" "amqp://guest:guest@localhost")
+        ssl-uri (clojure.string/replace uri #"amqp://" "amqps://")]
+    (rmq/connect {:uri ssl-uri :ssl true}))) ;; Connect to the broker
 
 (defn publish-periodically []
   (.start (Thread. 
