@@ -1,0 +1,10 @@
+{
+  "name": "Clojure AMQP Sample App",
+  "description": "A Clojure example project showing how to connect, publish and consume a message via CloudAMQP",
+  "repository": "https://github.com/cloudamqp/clojure-amqp-example",
+  "logo": "http://www.cloudamqp.com/images/rabbit_256.png",
+  "keywords": ["clojure", "cloudamqp", "amqp", "rabbitmq"],
+    "addons": [
+	  "cloudamqp"
+  ]
+}
