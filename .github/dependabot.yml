@@ -1,0 +1,7 @@
+version: 2
+updates:
+  # Dependabot doesn't support Leiningen, so project.clj is updated by hand
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
