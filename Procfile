@@ -1,2 +1,0 @@
-worker: lein trampoline run
-

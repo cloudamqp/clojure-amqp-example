@@ -1,13 +1,6 @@
 # clojure-amqp-example
 
-An example project showing how to connect, publish and consume a message via CloudAMQP
+This repository is no longer in use and archived on Wed Oct 21 09:48:02 AM UTC 2026, last commit was f182807.
 
-## Usage
+Last working version is available in the [archive](https://github.com/cloudamqp/clojure-amqp-example/tree/archive) branch.
 
-```bash
-lein run
-```
-
-## Deploy to Heroku
-
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
